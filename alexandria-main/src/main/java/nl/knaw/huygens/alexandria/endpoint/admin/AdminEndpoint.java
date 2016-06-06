@@ -78,7 +78,7 @@ public class AdminEndpoint extends JSONEndpoint {
     default:
       throw new BadRequestException("command " + job.command + " not recognized");
     }
-    return Response.ok(entity).build();
+    return ok(entity);
   }
 
   private String absoluteFilePath(AdminJob job) {

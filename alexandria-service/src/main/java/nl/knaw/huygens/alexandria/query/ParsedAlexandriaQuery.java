@@ -12,12 +12,12 @@ import static java.util.stream.Collectors.joining;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -38,13 +37,11 @@ import com.google.common.collect.Maps;
 import nl.knaw.huygens.alexandria.storage.Storage;
 import nl.knaw.huygens.alexandria.storage.frames.AlexandriaVF;
 import nl.knaw.huygens.alexandria.storage.frames.AnnotationVF;
+import nl.knaw.huygens.alexandria.util.StreamUtil;
 
 public class ParsedAlexandriaQuery {
   // this is just a container class for the results of processing the AlexandriaQuery parameters
-  private static final Function<Storage, Stream<AnnotationVF>> DEFAULT_ANNOTATIONVF_FINDER = storage -> {
-    Iterable<AnnotationVF> iterable = () -> storage.find(AnnotationVF.class);
-    return StreamSupport.stream(iterable.spliterator(), false);
-  };
+  private static final Function<Storage, Stream<AnnotationVF>> DEFAULT_ANNOTATIONVF_FINDER = storage -> StreamUtil.stream(storage.find(AnnotationVF.class));
 
   private Class<? extends AlexandriaVF> vfClazz;
   private Boolean distinct;
@@ -55,6 +52,8 @@ public class ParsedAlexandriaQuery {
   private Comparator<AnnotationVF> comparator;
   private Function<AnnotationVF, Map<String, Object>> mapper;
   private Function<Storage, Stream<AnnotationVF>> annotationVFFinder = DEFAULT_ANNOTATIONVF_FINDER;
+
+  private Function<Storage, Stream<Map<String, Object>>> resultStreamMapper;
 
   public ParsedAlexandriaQuery setVFClass(Class<? extends AlexandriaVF> vfClass) {
     this.vfClazz = vfClass;
@@ -156,4 +155,20 @@ public class ParsedAlexandriaQuery {
     }
     return null;
   }
+
+  public Function<Storage, Stream<Map<String, Object>>> getResultStreamMapper() {
+    if (vfClazz == AnnotationVF.class) {
+      return (storage) -> annotationVFFinder//
+          .apply(storage).filter(predicate)//
+          .sorted(comparator)//
+          .map(mapper);
+    }
+
+    return resultStreamMapper;
+  }
+
+  public void setResultStreamMapper(Function<Storage, Stream<Map<String, Object>>> resultStreamMapper) {
+    this.resultStreamMapper = resultStreamMapper;
+  }
+
 }

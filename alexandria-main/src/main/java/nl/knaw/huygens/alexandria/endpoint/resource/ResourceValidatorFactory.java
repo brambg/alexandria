@@ -71,31 +71,37 @@ public class ResourceValidatorFactory {
       return resource;
     }
 
-    public AlexandriaResource notTentative() {
+    public ResourceValidator notTentative() {
       if (resource.getState() == AlexandriaState.TENTATIVE) {
         throw resourceIsTentativeException(resource.getId());
       }
-      return resource;
+      return this;
     }
 
-    public AlexandriaResource inState(AlexandriaState requiredState) {
+    public ResourceValidator inState(AlexandriaState requiredState) {
       final AlexandriaState actualState = resource.getState();
       if (actualState != requiredState) {
         throw new ConflictException("Object not in state " + requiredState + " but in state " + actualState);
       }
 
-      return resource;
+      return this;
     }
 
-    public AlexandriaResource notInState(AlexandriaState requiredState) {
+    public ResourceValidator notInState(AlexandriaState requiredState) {
       final AlexandriaState actualState = resource.getState();
       if (actualState == requiredState) {
         throw new ConflictException("Object should not be in state " + requiredState + " but is.");
       }
 
-      return resource;
+      return this;
     }
 
+    public ResourceValidator hasText() {
+      if (!resource.hasText()) {
+        throw new ConflictException("Resource should have a text, but doesn't.");
+      }
+      return this;
+    }
   }
 
 }

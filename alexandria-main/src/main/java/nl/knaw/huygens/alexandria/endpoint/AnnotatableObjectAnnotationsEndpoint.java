@@ -86,7 +86,7 @@ public abstract class AnnotatableObjectAnnotationsEndpoint extends JSONEndpoint 
         .map((AlexandriaAnnotation a) -> AnnotationEntity.of(a).withLocationBuilder(locationBuilder))//
         .collect(toSet());
     Map<String, Set<AnnotationEntity>> entity = ImmutableMap.of("annotations", annotationEntities);
-    return Response.ok(entity).build();
+    return ok(entity);
   }
 
   @POST
@@ -97,7 +97,7 @@ public abstract class AnnotatableObjectAnnotationsEndpoint extends JSONEndpoint 
     prototype.setState(AlexandriaState.TENTATIVE);
     AnnotationCreationRequest request = getAnnotationCreationRequestBuilder().build(prototype);
     AlexandriaAnnotation annotation = request.execute(service);
-    return Response.created(locationBuilder.locationOf(annotation)).build();
+    return created(locationBuilder.locationOf(annotation));
   }
 
   private void validateLocator(AnnotationPrototype prototype) {

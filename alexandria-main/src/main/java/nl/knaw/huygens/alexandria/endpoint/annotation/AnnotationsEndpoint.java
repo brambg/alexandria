@@ -54,8 +54,6 @@ import nl.knaw.huygens.alexandria.service.AlexandriaService;
 @Path(EndpointPaths.ANNOTATIONS)
 @Api("annotations")
 public class AnnotationsEndpoint extends JSONEndpoint {
-  public final static String REVPATH = "rev";
-
   private final AlexandriaService service;
   private final AnnotationEntityBuilder entityBuilder;
   private final AnnotationDeprecationRequestBuilder requestBuilder;
@@ -95,7 +93,7 @@ public class AnnotationsEndpoint extends JSONEndpoint {
   // Sub-resource delegation
 
   @GET
-  @Path("{uuid}/" + REVPATH + "/{revision}")
+  @Path("{uuid}/" + EndpointPaths.REV + "/{revision}")
   @ApiOperation(value = "get the given revision of the annotation", response = AnnotationEntity.class)
   public Response readVersionedAnnotation(@PathParam("uuid") UUIDParam uuidParam, //
                                           @PathParam("revision") Integer revision) {

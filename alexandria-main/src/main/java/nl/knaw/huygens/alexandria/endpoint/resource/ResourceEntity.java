@@ -29,11 +29,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import io.swagger.annotations.ApiModel;
+import nl.knaw.huygens.alexandria.api.JsonTypeNames;
 import nl.knaw.huygens.alexandria.endpoint.LocationBuilder;
 import nl.knaw.huygens.alexandria.model.AbstractAnnotatable;
 import nl.knaw.huygens.alexandria.model.AlexandriaResource;
 
-@JsonTypeName("resource")
+@JsonTypeName(JsonTypeNames.RESOURCE)
 @JsonPropertyOrder({ "id", "ref", "hasText" })
 @JsonInclude(Include.NON_NULL)
 @ApiModel("resource")

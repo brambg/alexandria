@@ -1,5 +1,10 @@
 package nl.knaw.huygens.alexandria.endpoint;
 
+import java.util.UUID;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.core.Response;
+
 /*
  * #%L
  * alexandria-main
@@ -23,12 +28,6 @@ package nl.knaw.huygens.alexandria.endpoint;
  */
 
 import io.swagger.annotations.ApiOperation;
-
-import java.util.UUID;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.core.Response;
-
 import nl.knaw.huygens.Log;
 import nl.knaw.huygens.alexandria.model.Accountable;
 import nl.knaw.huygens.alexandria.model.AlexandriaProvenance;
@@ -54,7 +53,7 @@ public abstract class AccountableProvenanceEndpoint extends JSONEndpoint {
   public Response get() {
     AlexandriaProvenance provenance = getAccountable().getProvenance();
     ProvenanceEntity entity = ProvenanceEntity.of(provenance).withLocationBuilder(locationBuilder);
-    return Response.ok(entity).build();
+    return ok(entity);
   }
 
 }

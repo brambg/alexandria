@@ -24,13 +24,15 @@ package nl.knaw.huygens.alexandria.storage.frames;
 
 import java.util.List;
 
-import nl.knaw.huygens.alexandria.storage.Labels;
+import nl.knaw.huygens.alexandria.storage.VertexLabels;
+import nl.knaw.huygens.alexandria.storage.frames.AnnotationVF.EdgeLabels;
+import peapod.FramedVertex;
 import peapod.annotations.Edge;
 import peapod.annotations.In;
 import peapod.annotations.Vertex;
 
-@Vertex(Labels.ANNOTATIONBODY)
-public abstract class AnnotationBodyVF extends AlexandriaVF {
+@Vertex(VertexLabels.ANNOTATIONBODY)
+public abstract class AnnotationBodyVF extends AlexandriaVF implements FramedVertex<AnnotationBodyVF> {
   public abstract void setType(String type);
 
   public abstract String getType();
@@ -40,7 +42,7 @@ public abstract class AnnotationBodyVF extends AlexandriaVF {
   public abstract String getValue();
 
   @In
-  @Edge(AnnotationVF.HAS_BODY)
+  @Edge(EdgeLabels.HAS_BODY)
   public abstract List<AnnotationVF> getOfAnnotationList();
 
 }

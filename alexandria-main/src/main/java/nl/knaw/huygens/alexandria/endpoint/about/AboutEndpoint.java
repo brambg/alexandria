@@ -74,14 +74,14 @@ public class AboutEndpoint extends JSONEndpoint {
         .setStartedAt(STARTED_AT)//
         .setTentativesTTL(tentativesTTL.toString())//
         .setVersion(properties.getProperty("version").get());
-    return Response.ok(about).build();
+    return ok(about);
   }
 
   @GET
   @Path("service")
   @RolesAllowed({ CERTIFIED, JANITOR })
   public Response getGraphMetadata() {
-    return Response.ok(service.getMetadata()).build();
+    return ok(service.getMetadata());
   }
 
 }

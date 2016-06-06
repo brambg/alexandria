@@ -24,15 +24,22 @@ package nl.knaw.huygens.alexandria.storage.frames;
 
 import java.util.List;
 
-import nl.knaw.huygens.alexandria.storage.Labels;
+import nl.knaw.huygens.alexandria.storage.VertexLabels;
+import peapod.FramedVertex;
 import peapod.annotations.Edge;
 import peapod.annotations.In;
 import peapod.annotations.Out;
 import peapod.annotations.Vertex;
 
-@Vertex(Labels.RESOURCE)
-public abstract class ResourceVF extends AlexandriaVF {
-  public static final String PART_OF = "part_of";
+@Vertex(VertexLabels.RESOURCE)
+public abstract class ResourceVF extends AlexandriaVF implements FramedVertex<ResourceVF> {
+  public static class Properties {
+    public static final String CARGO = "cargo";
+  }
+
+  public static class EdgeLabels {
+    public static final String PART_OF = "part_of";
+  }
 
   public abstract String getCargo();
 
@@ -42,24 +49,36 @@ public abstract class ResourceVF extends AlexandriaVF {
 
   public abstract void setHasText(Boolean hasText);
 
-  public abstract void setBaseLayerDefinition(String json);
+  public abstract void setSerializedTextViewMap(String json);
 
-  public abstract String getBaseLayerDefinition();
+  public abstract String getSerializedTextViewMap();
+
+  public abstract void setSerializedTextViewDefinitionMap(String json);
+
+  public abstract String getSerializedTextViewDefinitionMap();
 
   @In
-  @Edge(AnnotationVF.ANNOTATES_RESOURCE)
+  @Edge(nl.knaw.huygens.alexandria.storage.frames.AnnotationVF.EdgeLabels.ANNOTATES_RESOURCE)
   public abstract List<AnnotationVF> getAnnotatedBy();
 
   @In
-  @Edge(PART_OF)
+  @Edge(EdgeLabels.PART_OF)
   public abstract List<ResourceVF> getSubResources();
 
+  @In
+  @Edge(nl.knaw.huygens.alexandria.storage.frames.AnnotatorVF.EdgeLabels.HAS_RESOURCE)
+  public abstract List<AnnotatorVF> getAnnotators();
+
+  @In
+  @Edge(nl.knaw.huygens.alexandria.storage.frames.TextRangeAnnotationVF.EdgeLabels.HAS_RESOURCE)
+  public abstract List<TextRangeAnnotationVF> getTextRangeAnnotations();
+
   @Out
-  @Edge(PART_OF)
+  @Edge(EdgeLabels.PART_OF)
   public abstract ResourceVF getParentResource();
 
   @Out
-  @Edge(PART_OF)
+  @Edge(EdgeLabels.PART_OF)
   public abstract void setParentResource(ResourceVF resourceVF);
 
   public boolean isSubresource() {

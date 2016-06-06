@@ -49,4 +49,9 @@ public class MockConfiguration implements AlexandriaConfiguration {
     return "whatever";
   }
 
+  @Override
+  public Boolean asynchronousEndpointsAllowed() {
+    return true;
+  }
+
 }

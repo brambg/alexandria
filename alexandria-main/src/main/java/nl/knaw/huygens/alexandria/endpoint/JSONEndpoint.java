@@ -44,6 +44,10 @@ public abstract class JSONEndpoint {
     return Response.noContent().build();
   }
 
+  protected Response conflict() {
+    return Response.status(Status.CONFLICT).build();
+  }
+
   protected Response ok() {
     return Response.ok().build();
   }

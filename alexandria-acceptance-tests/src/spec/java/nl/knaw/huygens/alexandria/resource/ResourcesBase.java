@@ -25,13 +25,17 @@ package nl.knaw.huygens.alexandria.resource;
 import org.junit.BeforeClass;
 
 import nl.knaw.huygens.alexandria.concordion.AlexandriaAcceptanceTest;
+import nl.knaw.huygens.alexandria.endpoint.command.CommandsEndpoint;
 import nl.knaw.huygens.alexandria.endpoint.resource.ResourcesEndpoint;
+import nl.knaw.huygens.alexandria.endpoint.search.SearchEndpoint;
 import nl.knaw.huygens.alexandria.jersey.exceptionmappers.WebApplicationExceptionMapper;
 
 public class ResourcesBase extends AlexandriaAcceptanceTest {
   @BeforeClass
   public static void registerEndpoint() {
     register(ResourcesEndpoint.class);
+    register(CommandsEndpoint.class);
+    register(SearchEndpoint.class);
     register(WebApplicationExceptionMapper.class);
   }
 }

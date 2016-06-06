@@ -82,15 +82,16 @@ function a-generate-confirmed-subresource-with-title {
   echo ${suburi}
 }
 
-function a-set-default-baselayer-definition {
-  a-log "Setting default baselayer definition for ${be}/resources/$ri"
-  curl -i -H "${authheader}" -X PUT $be/resources/$ri/baselayerdefinition -H 'Content-type: application/json' \
-     --data-binary '{"baseLayerDefinition":{
-     	 "subresourceElements": ["note"],
-       "baseElements" : [
-          { "name": "text", "baseAttributes": [ "id" ] },
-          { "name": "p", "baseAttributes": [ "id" ] },
-          { "name": "div", "baseAttributes" : [ "id", "by" ] }
+function a-set-baselayer-textview {
+  a-log "Setting default baselayer textview for ${be}/resources/$ri"
+  curl -i -H "${authheader}" -X PUT $be/resources/$ri/text/views/baselayer -H 'Content-type: application/json' \
+     --data-binary '{"textView":{
+       "description" : "The base layer",
+     	 "ignoredElements": ["note"],
+       "includedElements" : [
+          { "name": "text", "includedAttributes": [ "id" ] },
+          { "name": "p", "includedAttributes": [ "id" ] },
+          { "name": "div", "includedAttributes" : [ "id", "by" ] }
        ]}
      }'
 }
@@ -125,6 +126,12 @@ function a-use-localhost {
   a-set-authkey ${ALEXANDRIA_AUTHKEY_LOCAL}
 }
 
+function a-use-localip {
+  localip=$(ipconfig|grep IPv4|grep -v Autoconfiguration|sed -e "s/.*: //")
+  a-set-backend http://${localip}:2015
+  a-set-authkey ${ALEXANDRIA_AUTHKEY_LOCAL}
+}
+
 function a-use-test {
   a-set-backend http://test.alexandria.huygens.knaw.nl/
   a-set-authkey ${ALEXANDRIA_AUTHKEY_TEST}
@@ -155,28 +162,77 @@ function a-about-service {
 function a-dry-run {
   ri=$(uuidgen)
   a-generate-resource-with-uuid $ri
-  curl -i -H "${authheader}" -X PUT $be/resources/$ri/baselayerdefinition -H 'Content-type: application/json' \
-	--data-binary '{
-	  "baseLayerDefinition": {
-	  	"subresourceElements": ["note"],
-	    "baseElements": [ {
-	      "name": "body"
-	    }, {
-	      "name": "div",
-	      "baseAttributes": [ "type" ]
-	    }, {
-	      "name": "p"
-	    }, {
-	      "name": "sub"
-	    }, {
-	      "name": "sup"
-	    } ]
-	  }
-	}'
+  curl -i -H "${authheader}" -X PUT $be/resources/$ri/text/views/baselayer -H 'Content-type: application/json' \
+  --data-binary '{
+    "textView": {
+      "description" : "The Base Layer",
+      "ignoredElements": ["note"],
+      "includedElements": [ {
+        "name": "body"
+      }, {
+        "name": "div",
+        "includedAttributes": [ "type" ]
+      }, {
+        "name": "text"
+      }, {
+        "name": "p"
+      }, {
+        "name": "table"
+      }, {
+        "name": "row"
+      }, {
+        "name": "cell"
+      }, {
+        "name": "sub"
+      }, {
+        "name": "sup"
+      } ]
+    }
+  }'
   a-log "result uploading text:"
   curl --silent --header "${authheader}" -X PUT ${be}/resources/${ri}/text --header 'Content-Type:text/xml' --data "$*" | jq "."
   a-log "extracted baselayer:"
-  curl ${be}/resources/${ri}/text
+  curl ${be}/resources/${ri}/text/xml?view=baselayer
+}
+
+function a-dry-run-from-file {
+  ri=$(uuidgen)
+  a-generate-resource-with-uuid $ri
+  a-log "result uploading text:"
+  location=$(curl -i --header "${authheader}" -X PUT ${be}/resources/${ri}/text --header 'Content-Type:application/octet-stream' --data @"$*" |a-location)
+  a-log "Location: ${location}"
+  curl --silent ${location} | jq "."
+  curl -i -H "${authheader}" -X PUT $be/resources/$ri/text/views/baselayer -H 'Content-type: application/json' \
+  --data-binary '{
+    "textView": {
+      "description" : "The Base Layer",
+      "ignoredElements": ["note"],
+      "includedElements": [ {
+        "name": "body"
+      }, {
+        "name": "div",
+        "includedAttributes": [ "type" ]
+      }, {
+        "name": "text"
+      }, {
+        "name": "p"
+      }, {
+        "name": "table"
+      }, {
+        "name": "row"
+      }, {
+        "name": "cell"
+      }, {
+        "name": "sub"
+      }, {
+        "name": "sup"
+      } ]
+    }
+  }'
+  a-log "extracted baselayer:"
+  curl ${be}/resources/${ri}/text/views/baselayer
+  curl --silent ${location} | jq "."
+  a-log "see status at ${location}"
 }
 
 function a-gutenberg-import-file {
@@ -193,7 +249,7 @@ function a-gutenberg-import-file {
         "name": "TEI"
       }, {
         "name": "div",
-        "baseAttributes": [ "type" ]
+        "includedAttributes": [ "type" ]
       }, {
         "name": "body"
       }, {
@@ -208,11 +264,10 @@ function a-gutenberg-import-file {
     }
   }'
   a-log "result uploading text:"
-  curl --silent --header "${authheader}" -X PUT ${be}/resources/${ri}/text --header 'Content-Type:application/octet-stream' --data @"$*" | jq "."
-  a-log "extracted baselayer:"
-  curl ${be}/resources/${ri}/text
+  location=$(curl -i --header "${authheader}" -X PUT ${be}/resources/${ri}/text --header 'Content-Type:application/octet-stream' --data @"$*" |a-location)
+  a-log "Location: ${location}"
+  curl --silent ${location} | jq "."
+  a-log "see status at ${location}"
 }
 
-
-
-a-use-localhost
+a-use-localip

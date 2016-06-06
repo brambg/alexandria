@@ -37,6 +37,11 @@ public abstract class AbstractAlexandriaConfigurationUsingAlexandriaProperties i
     return getAlexandriaPropertiesConfiguration().getAdminKey();
   }
 
+  @Override
+  public Boolean asynchronousEndpointsAllowed() {
+    return true;
+  }
+
   private AlexandriaPropertiesConfiguration getAlexandriaPropertiesConfiguration() {
     if (alexandriaPropertiesConfiguration == null) {
       alexandriaPropertiesConfiguration = new AlexandriaPropertiesConfiguration(getStorageDirectory());

@@ -10,12 +10,12 @@ package nl.knaw.huygens.alexandria.query;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +48,9 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -58,17 +62,18 @@ import nl.knaw.huygens.Log;
 import nl.knaw.huygens.alexandria.antlr.AQLLexer;
 import nl.knaw.huygens.alexandria.antlr.AQLParser;
 import nl.knaw.huygens.alexandria.api.model.AlexandriaState;
+import nl.knaw.huygens.alexandria.api.model.search.AlexandriaQuery;
+import nl.knaw.huygens.alexandria.api.model.search.QueryField;
+import nl.knaw.huygens.alexandria.api.model.search.QueryFunction;
 import nl.knaw.huygens.alexandria.endpoint.LocationBuilder;
 import nl.knaw.huygens.alexandria.exception.BadRequestException;
 import nl.knaw.huygens.alexandria.model.AlexandriaAnnotation;
 import nl.knaw.huygens.alexandria.model.AlexandriaResource;
-import nl.knaw.huygens.alexandria.model.search.AlexandriaQuery;
-import nl.knaw.huygens.alexandria.model.search.QueryField;
-import nl.knaw.huygens.alexandria.model.search.QueryFunction;
 import nl.knaw.huygens.alexandria.storage.Storage;
 import nl.knaw.huygens.alexandria.storage.frames.AlexandriaVF;
 import nl.knaw.huygens.alexandria.storage.frames.AnnotationVF;
 import nl.knaw.huygens.alexandria.storage.frames.ResourceVF;
+import nl.knaw.huygens.alexandria.util.StreamUtil;
 
 public class AlexandriaQueryParser {
   static final String ALLOWED_FIELDS = ", available fields: " + Joiner.on(", ").join(QueryField.ALL_EXTERNAL_NAMES);
@@ -111,17 +116,62 @@ public class AlexandriaQueryParser {
 
     // any tokens with resource.id or subresource.id need to be filtered out and lead to an annotationVFFinder
     List<WhereToken> resourceWhereTokens = filterResourceWhereTokens(tokens);
-    if (!resourceWhereTokens.isEmpty()) {
-      Function<Storage, Stream<AnnotationVF>> annotationVFFinder = createAnnotationVFFinder(resourceWhereTokens);
-      if (annotationVFFinder != null) {
-        paq.setAnnotationVFFinder(annotationVFFinder);
-      }
-    }
-
     tokens.removeAll(resourceWhereTokens);
+    if (ResourceVF.class == paq.getVFClass()) {
+      paq.setResultStreamMapper(createResultStreamMapper(resourceWhereTokens));
 
-    // create a predicate for filtering the annotationVF stream based on the remaining tokens
-    paq.setPredicate(createPredicate(tokens));
+    } else {
+      if (!resourceWhereTokens.isEmpty()) {
+        Function<Storage, Stream<AnnotationVF>> annotationVFFinder = createAnnotationVFFinder(resourceWhereTokens);
+        if (annotationVFFinder != null) {
+          paq.setAnnotationVFFinder(annotationVFFinder);
+        }
+      }
+
+      // create a predicate for filtering the annotationVF stream based on the remaining tokens
+      paq.setPredicate(createPredicate(tokens));
+    }
+  }
+
+  private Function<Storage, Stream<Map<String, Object>>> createResultStreamMapper(List<WhereToken> resourceWhereTokens) {
+    // TODO extend use of resource queries, current implementation only for implementation of nla-264 case
+    return (storage) -> {
+      GraphTraversal<Vertex, Vertex> traversal = storage.getResourceVertexTraversal();
+
+      Optional<String> rootResourceUUID = resourceWhereTokens.stream()//
+          .filter(t -> t.getProperty().equals(QueryField.resource_id)//
+              && t.getFunction().equals(QueryFunction.eq))//
+          .map(t -> t.getParameters().get(0))//
+          .map(String.class::cast)//
+          .findFirst();
+      if (rootResourceUUID.isPresent()) {
+        traversal = traversal.has(Storage.IDENTIFIER_PROPERTY, rootResourceUUID.get());
+      }
+
+      Optional<String> sub = resourceWhereTokens.stream()//
+          .filter(t -> t.getProperty().equals(QueryField.subresource_sub)//
+              && t.getFunction().equals(QueryFunction.eq))//
+          .map(t -> t.getParameters().get(0))//
+          .map(String.class::cast)//
+          .findFirst();
+      if (sub.isPresent()) {
+        traversal = traversal//
+            .until(__.has(ResourceVF.Properties.CARGO, sub.get()))//
+            .repeat(__.in(ResourceVF.EdgeLabels.PART_OF));
+      }
+
+      Stream<Map<String, Object>> stream = StreamUtil.stream(traversal)//
+          .map(v -> storage.frameVertex(v, ResourceVF.class))//
+          .map(this::toResultMap);
+      return stream;
+    };
+  }
+
+  private Map<String, Object> toResultMap(ResourceVF rvf) {
+    Map<String, Object> map = new HashMap<>();
+    map.put(QueryField.subresource_id.externalName(), rvf.getUuid().toString());
+    // map.put(QueryField.subresource_sub.externalName(), rvf.getCargo());
+    return map;
   }
 
   private void addDefaultStateTokenWhenNeeded(List<WhereToken> tokens) {
@@ -191,12 +241,11 @@ public class AlexandriaQueryParser {
       return AnnotationVF.class;
 
     case "resource":
-      parseErrors.add("find: type 'resource' not supported yet");
+      // parseErrors.add("find: type 'resource' not supported yet");
       return ResourceVF.class;
 
     default:
-      parseErrors.add("find: unknown type '" + find + "', should be 'annotation'");
-      // parseErrors.add("unknown type '" + find + "' in find, should be 'annotation' or 'resource'");
+      parseErrors.add("find: unknown type '" + find + "', should be 'annotation' or 'resource'");
       return null;
     }
   }

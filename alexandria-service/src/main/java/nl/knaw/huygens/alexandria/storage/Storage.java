@@ -37,6 +37,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Features.GraphFeatures;
+import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.io.IoCore;
 import org.apache.tinkerpop.gremlin.structure.io.graphml.GraphMLIo;
@@ -49,6 +50,7 @@ import nl.knaw.huygens.Log;
 import nl.knaw.huygens.alexandria.api.model.AlexandriaState;
 import nl.knaw.huygens.alexandria.storage.frames.AlexandriaVF;
 import nl.knaw.huygens.alexandria.storage.frames.ResourceVF;
+import nl.knaw.huygens.alexandria.storage.frames.VF;
 import peapod.FramedGraph;
 import peapod.FramedGraphTraversal;
 
@@ -142,19 +144,19 @@ public class Storage {
     }
   }
 
-  public boolean existsVF(final Class<? extends AlexandriaVF> vfClass, final UUID uuid) {
+  public boolean existsVF(final Class<? extends VF> vfClass, final UUID uuid) {
     assertInTransaction();
     assertClass(vfClass);
     return find(vfClass, uuid).tryNext().isPresent();
   }
 
-  public <A extends AlexandriaVF> A createVF(final Class<A> vfClass) {
+  public <A extends VF> A createVF(final Class<A> vfClass) {
     assertInTransaction();
     assertClass(vfClass);
     return framedGraph.addVertex(vfClass);
   }
 
-  public <A extends AlexandriaVF> Optional<A> readVF(final Class<A> vfClass, final UUID uuid) {
+  public <A extends VF> Optional<A> readVF(final Class<A> vfClass, final UUID uuid) {
     assertInTransaction();
     assertClass(vfClass);
     return firstOrEmpty(find(vfClass, uuid).toList());
@@ -166,7 +168,7 @@ public class Storage {
     return firstOrEmpty(find(vfClass, uuid, revision).toList());
   }
 
-  public <A extends AlexandriaVF> FramedGraphTraversal<Object, A> find(Class<A> vfClass) {
+  public <A extends VF> FramedGraphTraversal<Object, A> find(Class<A> vfClass) {
     assertInTransaction();
     assertClass(vfClass);
     return framedGraph.V(vfClass);
@@ -175,6 +177,10 @@ public class Storage {
   public GraphTraversal<Vertex, Vertex> getVertexTraversal(Object... vertexIds) {
     assertInTransaction();
     return graph.traversal().V(vertexIds);
+  }
+
+  public GraphTraversal<Vertex, Vertex> getResourceVertexTraversal(Object... vertexIds) {
+    return getVertexTraversal(vertexIds).has(T.label, "Resource");
   }
 
   // graph methods
@@ -253,13 +259,23 @@ public class Storage {
     }
     // Log.info("destroy done");
   }
+
+  public Vertex addVertex(Object... keyValues) {
+    assertInTransaction();
+    return graph.addVertex(keyValues);
+  }
+
+  public <A extends VF> A frameVertex(Vertex v, Class<A> vfClass) {
+    return framedGraph.frame(v, vfClass);
+  }
+
   // - private methods - //
 
-  private <A extends AlexandriaVF> FramedGraphTraversal<Object, A> find(final Class<A> vfClass, final UUID uuid) {
+  private <A extends VF> FramedGraphTraversal<Object, A> find(final Class<A> vfClass, final UUID uuid) {
     return find(vfClass).has(IDENTIFIER_PROPERTY, uuid.toString());
   }
 
-  private <A extends AlexandriaVF> FramedGraphTraversal<Object, A> find(final Class<A> vfClass, final UUID uuid, final Integer revision) {
+  private <A extends VF> FramedGraphTraversal<Object, A> find(final Class<A> vfClass, final UUID uuid, final Integer revision) {
     return find(vfClass).has(IDENTIFIER_PROPERTY, uuid.toString() + "." + revision);
   }
 
@@ -311,10 +327,10 @@ public class Storage {
   }
 
   private void assertInTransaction() {
-    Preconditions.checkState(getTransactionIsOpen(), "We should be in open transaction at this point, use runInTransaction()!");
+    Preconditions.checkState(getTransactionIsOpen(), "We should be in an open transaction at this point, use runInTransaction()!");
   }
 
-  private void assertClass(final Class<? extends AlexandriaVF> clazz) {
+  private void assertClass(final Class<? extends VF> clazz) {
     Preconditions.checkState(//
         clazz.getAnnotationsByType(peapod.annotations.Vertex.class).length > 0, //
         "Class " + clazz + " has no peapod @Vertex annotation, are you sure it's the correct class?"//
@@ -327,11 +343,6 @@ public class Storage {
 
   private void assertTransactionIsOpen() {
     Preconditions.checkState(getTransactionIsOpen(), "We're not in an open transaction!");
-  }
-
-  public Vertex addVertex(Object... keyValues) {
-    assertInTransaction();
-    return graph.addVertex(keyValues);
   }
 
 }

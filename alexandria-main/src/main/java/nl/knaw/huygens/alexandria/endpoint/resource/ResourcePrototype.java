@@ -24,11 +24,12 @@ package nl.knaw.huygens.alexandria.endpoint.resource;
 
 import javax.validation.constraints.NotNull;
 
-import nl.knaw.huygens.alexandria.endpoint.AbstractAccountablePrototype;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeName("resource")
+import nl.knaw.huygens.alexandria.api.JsonTypeNames;
+import nl.knaw.huygens.alexandria.endpoint.AbstractAccountablePrototype;
+
+@JsonTypeName(JsonTypeNames.RESOURCE)
 public class ResourcePrototype extends AbstractAccountablePrototype {
 
   @NotNull(message = "{nl.knaw.huygens.alexandria.endpoint.resource.ResourceProtoType.ref.NotNull.message}")

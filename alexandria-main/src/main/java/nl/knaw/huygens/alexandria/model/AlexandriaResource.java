@@ -1,5 +1,7 @@
 package nl.knaw.huygens.alexandria.model;
 
+import java.util.ArrayList;
+
 /*
  * #%L
  * alexandria-main
@@ -23,19 +25,18 @@ package nl.knaw.huygens.alexandria.model;
  */
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import jersey.repackaged.com.google.common.collect.Lists;
-import nl.knaw.huygens.alexandria.api.model.BaseLayerDefinition;
+import nl.knaw.huygens.alexandria.api.model.text.view.TextView;
 
 public class AlexandriaResource extends AbstractAnnotatable {
-
   private String cargo; // ref for resource, sub for subresource
   private Optional<IdentifiablePointer<AlexandriaResource>> parentResourcePointer = Optional.empty(); // only used in subresources
-  private Optional<IdentifiablePointer<AlexandriaResource>> firstParentResourceWithBaseLayerDefinitionPointer = Optional.empty(); // only used in subresources
   private Collection<IdentifiablePointer<AlexandriaResource>> subResourcePointers = Lists.newArrayList();
-  private Optional<BaseLayerDefinition> directBaseLayerDefinition = Optional.empty();
+  private List<TextView> directTextViews = new ArrayList<>();
   private boolean hasText = false;
 
   public AlexandriaResource(UUID id, TentativeAlexandriaProvenance provenance) {
@@ -80,19 +81,12 @@ public class AlexandriaResource extends AbstractAnnotatable {
     }
   }
 
-  public Optional<BaseLayerDefinition> getDirectBaseLayerDefinition() {
-    return directBaseLayerDefinition;
+  public List<TextView> getDirectTextViews() {
+    return directTextViews;
   }
 
-  public void setDirectBaseLayerDefinition(BaseLayerDefinition baseLayerDefinition) {
-    this.directBaseLayerDefinition = Optional.of(baseLayerDefinition);
+  public void setDirectTextViews(List<TextView> textViews) {
+    this.directTextViews = textViews;
   }
 
-  public Optional<IdentifiablePointer<AlexandriaResource>> getFirstAncestorResourceWithBaseLayerDefinitionPointer() {
-    return this.firstParentResourceWithBaseLayerDefinitionPointer;
-  }
-
-  public void setFirstAncestorResourceWithBaseLayerDefinitionPointer(IdentifiablePointer<AlexandriaResource> parentResourcePointer) {
-    this.firstParentResourceWithBaseLayerDefinitionPointer = Optional.of(parentResourcePointer);
-  }
 }

@@ -1,5 +1,8 @@
 package nl.knaw.huygens.alexandria.config;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /*
  * #%L
  * alexandria-service
@@ -30,8 +33,11 @@ import nl.knaw.huygens.alexandria.endpoint.annotation.AnnotationEntityBuilder;
 import nl.knaw.huygens.alexandria.endpoint.resource.ResourceEntityBuilder;
 import nl.knaw.huygens.alexandria.service.AlexandriaService;
 import nl.knaw.huygens.alexandria.service.TinkerPopService;
+import nl.knaw.huygens.alexandria.util.Scheduler;
 
 public abstract class AbstractAlexandriaServletModule extends ServletModule {
+  private static final int NTHREADS = 5;
+
   @Override
   protected void configureServlets() {
     // guice binds here
@@ -41,6 +47,9 @@ public abstract class AbstractAlexandriaServletModule extends ServletModule {
     bind(TinkerPopService.class).to(tinkerpopServiceClass);
     bind(AnnotationEntityBuilder.class).in(Scopes.SINGLETON);
     bind(ResourceEntityBuilder.class).in(Scopes.SINGLETON);
+    bind(Scheduler.class).in(Scopes.SINGLETON);
+    ExecutorService executorService = Executors.newFixedThreadPool(NTHREADS);
+    bind(ExecutorService.class).toInstance(executorService);
     super.configureServlets();
   }
 

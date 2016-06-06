@@ -24,15 +24,28 @@ package nl.knaw.huygens.alexandria.util;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Preconditions;
+
 import nl.knaw.huygens.Log;
 import nl.knaw.huygens.alexandria.service.AlexandriaService;
+import nl.knaw.huygens.alexandria.textgraph.TextGraphTaskStatusMap;
 
 public class CleanupCommand implements Runnable {
-  @Inject
   private AlexandriaService service;
+  private TextGraphTaskStatusMap taskStatusMap;
+
+  @Inject
+  public CleanupCommand(AlexandriaService service, TextGraphTaskStatusMap taskStatusMap) {
+    this.service = service;
+    this.taskStatusMap = taskStatusMap;
+  }
 
   @Override
   public void run() {
+    Preconditions.checkNotNull(service);
+    Preconditions.checkNotNull(taskStatusMap);
+    Log.info("removing expired textImport statuses");
+    taskStatusMap.removeExpiredTasks();
     Log.info("removing expired tentatives");
     service.removeExpiredTentatives();
   }

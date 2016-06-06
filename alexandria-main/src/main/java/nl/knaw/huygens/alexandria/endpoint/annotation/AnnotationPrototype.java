@@ -29,10 +29,11 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import io.swagger.annotations.ApiModel;
+import nl.knaw.huygens.alexandria.api.JsonTypeNames;
 import nl.knaw.huygens.alexandria.endpoint.AbstractAccountablePrototype;
 
-@JsonTypeName("annotation")
-@ApiModel("annotation")
+@JsonTypeName(JsonTypeNames.ANNOTATION)
+@ApiModel(JsonTypeNames.ANNOTATION)
 public class AnnotationPrototype extends AbstractAccountablePrototype {
   private String locator;
   private String type;

@@ -1,5 +1,9 @@
 package nl.knaw.huygens.alexandria.endpoint.resource;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import nl.knaw.huygens.alexandria.api.JsonTypeNames;
+
 /*
  * #%L
  * alexandria-main
@@ -24,9 +28,7 @@ package nl.knaw.huygens.alexandria.endpoint.resource;
 
 import nl.knaw.huygens.alexandria.endpoint.AbstractAccountablePrototype;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
-@JsonTypeName("subresource")
+@JsonTypeName(JsonTypeNames.SUBRESOURCE)
 public class SubResourcePrototype extends AbstractAccountablePrototype {
   private String sub;
 

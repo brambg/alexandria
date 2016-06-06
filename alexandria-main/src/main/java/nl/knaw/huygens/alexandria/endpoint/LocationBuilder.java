@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
 
+import nl.knaw.huygens.alexandria.api.EndpointPaths;
 import nl.knaw.huygens.alexandria.config.AlexandriaConfiguration;
 import nl.knaw.huygens.alexandria.model.Identifiable;
 import nl.knaw.huygens.alexandria.model.IdentifiablePointer;
@@ -62,7 +63,7 @@ public class LocationBuilder {
       UriBuilder uriBuilder = UriBuilder.fromUri(config.getBaseURI()) //
           .path(pathOf(identifiableClass)) //
           .path("{uuid}") //
-          .path("rev") //
+          .path(EndpointPaths.REV) //
           .path("{rev}");
       for (String subPath : subPaths) {
         uriBuilder = uriBuilder.path(subPath);

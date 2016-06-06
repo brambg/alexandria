@@ -25,12 +25,13 @@ package nl.knaw.huygens.alexandria.config;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
-import nl.knaw.huygens.Log;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+
+import nl.knaw.huygens.Log;
 
 @Provider
 public class JsonConfiguration implements ContextResolver<ObjectMapper> {
@@ -56,6 +57,7 @@ public class JsonConfiguration implements ContextResolver<ObjectMapper> {
     // mapper.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
 
     mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+    mapper.registerModule(new Jdk8Module());
 
     return mapper;
   }

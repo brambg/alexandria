@@ -40,13 +40,11 @@ import nl.knaw.huygens.alexandria.config.AlexandriaConfiguration;
 import nl.knaw.huygens.alexandria.jersey.AlexandriaApplication;
 import nl.knaw.huygens.alexandria.service.AlexandriaService;
 import nl.knaw.huygens.alexandria.service.AlexandriaServletModule;
-import nl.knaw.huygens.alexandria.text.FileSystemTextService;
-import nl.knaw.huygens.alexandria.text.TextService;
 import nl.knaw.huygens.alexandria.util.Scheduler;
 
 public class Server {
   private static final long ONE_HOUR = Duration.ofHours(1).toMillis();
-  private AlexandriaConfiguration config = new TestConfiguration();
+  private AlexandriaConfiguration config = new ServerConfiguration();
 
   public static void main(String[] args) throws IOException {
     new Server().run();
@@ -56,11 +54,8 @@ public class Server {
     URI uri = getBaseURI();
     final HttpServer httpServer = startServer(uri);
     Log.info("Jersey app started with WADL available at {}/application.wadl\n", uri);
-    Scheduler.scheduleExpiredTentativesRemoval();
 
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      shutdown(httpServer);
-    }));
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown(httpServer)));
 
     while (true) {
       try {
@@ -87,6 +82,8 @@ public class Server {
     Log.info("AlexandriaService {} initialized", service);
     ResourceConfig config = new AlexandriaApplication();
     Log.info("Starting grizzly at {} ...", uri);
+    Scheduler scheduler = locator.getService(Scheduler.class);
+    scheduler.scheduleExpiredTentativesRemoval();
     return GrizzlyHttpServerFactory.createHttpServer(uri, config, locator);
   }
 
@@ -96,7 +93,6 @@ public class Server {
       @Override
       protected void configure() {
         bind(AlexandriaConfiguration.class).toInstance(config);
-        bind(TextService.class).toInstance(new FileSystemTextService(config.getStorageDirectory() + "/texts"));
       }
     };
     BootstrapUtils.newInjector(locator, Arrays.asList(new AlexandriaServletModule(), configModule));

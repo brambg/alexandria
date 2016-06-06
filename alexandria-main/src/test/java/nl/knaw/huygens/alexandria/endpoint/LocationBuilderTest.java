@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import nl.knaw.huygens.alexandria.api.EndpointPaths;
 import nl.knaw.huygens.alexandria.config.MockConfiguration;
-import nl.knaw.huygens.alexandria.endpoint.annotation.AnnotationsEndpoint;
 import nl.knaw.huygens.alexandria.model.AlexandriaAnnotation;
 import nl.knaw.huygens.alexandria.model.AlexandriaAnnotationBody;
 import nl.knaw.huygens.alexandria.model.AlexandriaResource;
@@ -59,7 +59,7 @@ public class LocationBuilderTest {
 
     URI locationOf = lb.locationOf(AlexandriaAnnotation.class, deprecatedId);
 
-    assertThat(locationOf.toString()).isEqualTo("http://alexandria.eg/annotations/" + randomUUID + "/" + AnnotationsEndpoint.REVPATH + "/0");
+    assertThat(locationOf.toString()).isEqualTo("http://alexandria.eg/annotations/" + randomUUID + "/" + EndpointPaths.REV + "/0");
   }
 
   @Test

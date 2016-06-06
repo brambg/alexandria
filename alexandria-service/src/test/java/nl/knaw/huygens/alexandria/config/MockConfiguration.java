@@ -49,4 +49,9 @@ public class MockConfiguration implements AlexandriaConfiguration {
     return "adminkey";
   }
 
+  @Override
+  public Boolean asynchronousEndpointsAllowed() {
+    return true;
+  }
+
 }

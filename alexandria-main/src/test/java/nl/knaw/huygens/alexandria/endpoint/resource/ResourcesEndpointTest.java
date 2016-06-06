@@ -114,6 +114,8 @@ public class ResourcesEndpointTest extends MockedServiceEndpointTest {
     assertThat(response2.getStatus()).isEqualTo(Status.CREATED.getStatusCode());
   }
 
+  // private methods
+
   private ResourcePrototype deserialize(String json1) throws IOException {
     return om.readValue(fixQuotes(json1), ResourcePrototype.class);
   }

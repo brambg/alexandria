@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.knaw.huygens.alexandria</groupId>
     <artifactId>alexandria</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>v2.0</version>
   </parent>
   <artifactId>alexandria-java-client</artifactId>
 
@@ -14,6 +14,7 @@
       <artifactId>alexandria-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-json-jackson</artifactId>
@@ -28,6 +29,11 @@
           <groupId>com.fasterxml.jackson.core</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
+      <version>${jersey.version}</version>
     </dependency>
 
     <!-- Test dependencies -->
@@ -48,11 +54,6 @@
       <artifactId>alexandria-service</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.containers</groupId>
-      <artifactId>jersey-container-grizzly2-http</artifactId>
-      <version>${jersey.version}</version>
     </dependency>
 
   </dependencies>

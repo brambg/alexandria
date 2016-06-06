@@ -62,7 +62,7 @@ public class SubResourcesEndpoint extends JSONEndpoint {
     this.service = service;
     this.locationBuilder = locationBuilder;
     this.requestBuilder = requestBuilder;
-    this.parentId = validatorFactory.validateExistingResource(uuidParam).notTentative().getId();
+    this.parentId = validatorFactory.validateExistingResource(uuidParam).notTentative().get().getId();
   }
 
   @GET

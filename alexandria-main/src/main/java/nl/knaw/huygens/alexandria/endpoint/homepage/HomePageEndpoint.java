@@ -32,9 +32,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import nl.knaw.huygens.alexandria.endpoint.JSONEndpoint;
+
 @Singleton
 @Path("")
-public class HomePageEndpoint {
+public class HomePageEndpoint extends JSONEndpoint {
   /**
    * Shows the homepage for the backend
    *
@@ -57,7 +59,7 @@ public class HomePageEndpoint {
   @GET
   @Path("favicon.ico")
   public Response getFavIcon() {
-    return Response.noContent().build();
+    return noContent();
   }
 
   @GET

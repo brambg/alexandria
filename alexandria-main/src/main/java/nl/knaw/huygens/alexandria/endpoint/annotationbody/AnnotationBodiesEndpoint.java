@@ -1,5 +1,18 @@
 package nl.knaw.huygens.alexandria.endpoint.annotationbody;
 
+import java.net.URI;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 /*
  * #%L
  * alexandria-main
@@ -24,21 +37,6 @@ package nl.knaw.huygens.alexandria.endpoint.annotationbody;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import java.net.URI;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import nl.knaw.huygens.alexandria.api.EndpointPaths;
 import nl.knaw.huygens.alexandria.endpoint.JSONEndpoint;
 import nl.knaw.huygens.alexandria.endpoint.UUIDParam;
@@ -68,7 +66,7 @@ public class AnnotationBodiesEndpoint extends JSONEndpoint {
   public Response readAnnotationBody(@PathParam("uuid") UUIDParam uuidParam) {
     final AlexandriaAnnotationBody annotationBody = service.readAnnotationBody(uuidParam.getValue())//
         .orElseThrow(() -> new NotFoundException("No annotationbody found with id " + uuidParam));
-    return Response.ok(entityBuilder.build(annotationBody)).build();
+    return ok(entityBuilder.build(annotationBody));
   }
 
   @POST
@@ -79,10 +77,10 @@ public class AnnotationBodiesEndpoint extends JSONEndpoint {
     request.execute(service);
 
     if (request.wasCreated()) {
-      return Response.created(locationOf(prototype.getId().getValue())).build();
+      return created(locationOf(prototype.getId().getValue()));
     }
 
-    return Response.status(Status.CONFLICT).build();
+    return conflict();
   }
 
   @DELETE

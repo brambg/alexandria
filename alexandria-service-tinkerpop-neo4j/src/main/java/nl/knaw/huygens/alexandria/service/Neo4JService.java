@@ -29,13 +29,12 @@ import org.apache.tinkerpop.gremlin.neo4j.structure.Neo4jGraph;
 import nl.knaw.huygens.alexandria.config.AlexandriaConfiguration;
 import nl.knaw.huygens.alexandria.endpoint.LocationBuilder;
 import nl.knaw.huygens.alexandria.storage.Storage;
-import nl.knaw.huygens.alexandria.text.TextService;
 
 public class Neo4JService extends TinkerPopService {
 
   @Inject
-  public Neo4JService(AlexandriaConfiguration config, LocationBuilder locationBuilder, TextService textService) {
-    super(getStorage(config), locationBuilder, textService);
+  public Neo4JService(AlexandriaConfiguration config, LocationBuilder locationBuilder) {
+    super(getStorage(config), locationBuilder);
   }
 
   private static Storage getStorage(AlexandriaConfiguration config) {

@@ -93,7 +93,7 @@ public class ResourceAnnotationsEndpoint extends AnnotatableObjectAnnotationsEnd
         .collect(toSet());
 
     final Map<String, Set<AnnotationEntity>> entity = ImmutableMap.of("annotations", annotationEntities);
-    return Response.ok(entity).build();
+    return ok(entity);
   }
 
 }

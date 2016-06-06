@@ -115,6 +115,11 @@ public abstract class EndpointTest extends JerseyTest {
         return "whatever";
       }
 
+      @Override
+      public Boolean asynchronousEndpointsAllowed() {
+        return true;
+      }
+
     };
   }
 

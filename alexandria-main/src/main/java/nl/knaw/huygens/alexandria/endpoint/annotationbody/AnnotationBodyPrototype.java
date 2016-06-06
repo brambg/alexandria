@@ -28,12 +28,13 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import nl.knaw.huygens.alexandria.api.JsonTypeNames;
 import nl.knaw.huygens.alexandria.api.model.AlexandriaState;
 import nl.knaw.huygens.alexandria.api.model.JsonWrapperObject;
 import nl.knaw.huygens.alexandria.api.model.Prototype;
 import nl.knaw.huygens.alexandria.endpoint.UUIDParam;
 
-@JsonTypeName("annotationBody")
+@JsonTypeName(JsonTypeNames.ANNOTATIONBODY)
 public class AnnotationBodyPrototype extends JsonWrapperObject implements Prototype {
   @NotNull
   private UUIDParam id;

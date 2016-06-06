@@ -22,13 +22,11 @@ package nl.knaw.huygens.alexandria.textlocator;
  * #L%
  */
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 
 import nl.knaw.huygens.alexandria.model.AlexandriaResource;
 import nl.knaw.huygens.alexandria.service.AlexandriaService;
@@ -45,6 +43,7 @@ public class TextLocatorFactory {
       Long length = Long.valueOf(startAndLength[1]);
       return new ByOffsetTextLocator(start, length);
     });
+    prefix2locator.put(ByXPathTextLocator.PREFIX, (string) -> new ByXPathTextLocator().withXPath(string));
   }
 
   private AlexandriaService service;
@@ -66,14 +65,14 @@ public class TextLocatorFactory {
   }
 
   public void validate(AlexandriaTextLocator locator, AlexandriaResource resource) {
-    InputStream textStream = service.getResourceTextAsStream(resource.getId())//
-                                    .orElseThrow(() -> new BadRequestException("The resource has no text attached."));
-
-    try {
-      locator.validate(textStream);
-    } catch (TextLocatorValidationException tlve) {
-      throw new BadRequestException(tlve.getMessage());
-    }
+    // InputStream textStream = service.getResourceTextAsStream(resource.getId())//
+    // .orElseThrow(() -> new BadRequestException("The resource has no text attached."));
+    //
+    // try {
+    // locator.validate(textStream);
+    // } catch (TextLocatorValidationException tlve) {
+    // throw new BadRequestException(tlve.getMessage());
+    // }
   }
 
 }
